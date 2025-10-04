@@ -1,0 +1,32 @@
+exclude = [
+  ".venv",
+  ".git",
+  ".ruff_cache",
+  ".pytest_cache",
+  "build",
+  "dist",
+  "__pycache__"
+]
+
+line-length = 120
+target-version = "py313"
+
+[lint]
+select = [
+  "A",
+  "COM",
+  "E",
+  "F",
+  "I",
+  "PERF",
+  "PLC",
+  "PLE",
+  "PLW",
+  "SIM",
+  "W"
+]
+
+[format]
+quote-style = "double"
+skip-magic-trailing-comma = false
+line-ending = "lf"

@@ -1,0 +1,25 @@
+[project]
+name = "polish-notation"
+version = "0.1.0"
+description = "Polish Notation Converter"
+readme = "README.md"
+authors = [
+  { name = "ArekkusuDev", email = "arekkusu.dev@outlook.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[project.scripts]
+polish-notation = "polish_notation:main"
+
+[build-system]
+requires = ["uv_build>=0.8.22,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+  "commitizen>=4.9.1",
+  "pre-commit>=4.3.0",
+  "pytest>=8.4.2",
+  "ruff>=0.13.3",
+]
