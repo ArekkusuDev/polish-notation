@@ -26,8 +26,10 @@ src/polish_notation/
 ## Key Patterns
 - **Spanish Naming**: Use Spanish for comments, docstrings, and educational content
 - **Textual TUI**: Follow Textual patterns for reactive UI components
+- **Python Best Practices**: Follow Python best practices and write Pythonic code
 - **Educational Focus**: Include step-by-step algorithm visualization
 - **Error Handling**: Clear error messages for invalid expressions
+- **Comments**: Never write comments that explain what the code does. Instead, write comments that explain why the code does what it does.
 
 ## Implementation Notes
 - Support operators: `+ - * / ^` with parentheses
