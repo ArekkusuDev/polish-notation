@@ -7,7 +7,9 @@ authors = [
   { name = "ArekkusuDev", email = "arekkusu.dev@outlook.com" }
 ]
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "textual>=6.2.1",
+]
 
 [project.scripts]
 polish-notation = "polish_notation:main"
@@ -22,4 +24,5 @@ dev = [
   "pre-commit>=4.3.0",
   "pytest>=8.4.2",
   "ruff>=0.13.3",
+  "textual-dev>=1.7.0",
 ]
