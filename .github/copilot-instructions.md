@@ -35,6 +35,7 @@ src/polish_notation/
 - Validate balanced parentheses and valid tokens
 - Show intermediate steps (operator queue/stack states)
 - Two conversion methods: Shunting Yard for postfix, AST inversion for prefix
+- Parentheses are not included in postfix and prefix output as operator precedence is implicit
 - **Evaluation**: Compute results using postfix expression (stack-based evaluation) with variable substitution
 
 ## Examples
