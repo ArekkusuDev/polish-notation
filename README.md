@@ -56,14 +56,14 @@ tests/
 
 ## Roadmap
 - [x] Configurar entorno
-- [ ] Implementar lexer básico
-- [ ] Implementar verificación de paréntesis
-- [ ] Implementar conversión a postfija (Shunting Yard)
-- [ ] Implementar conversión a prefija (AST o método invertido)
-- [ ] Añadir manejo de errores con mensajes claros
+- [x] Implementar lexer básico
+- [x] Implementar verificación de paréntesis
+- [x] Implementar conversión a postfija (Shunting Yard)
+- [x] Implementar conversión a prefija (AST o método invertido)
+- [x] Añadir manejo de errores con mensajes claros
 - [ ] Diseñar TUI mínima (entrada + salida)
 - [ ] Añadir modo "paso a paso" (cola de operadores / pila)
-- [ ] Pruebas unitarias de casos simples
-- [ ] Soporte de números multi-dígito
+- [x] Pruebas unitarias de casos simples
+- [x] Soporte de números multi-dígito
 - [ ] Soporte de funciones (sin, log, etc.) (futuro)
 - [ ] Documentar ejemplos avanzados
