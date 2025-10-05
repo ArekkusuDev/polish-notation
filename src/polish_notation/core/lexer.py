@@ -1,6 +1,20 @@
 import re
 from typing import List
 
+# Definición de patrones de tokens basada en la gramática de expresiones matemáticas
+# Se utiliza orden específico para evitar conflictos entre patrones similares
+_TOKEN_SPEC = [
+    ("NUMBER", r"\d+(\.\d+)?"),  # Números enteros y decimales
+    ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_]*"),  # Variables y funciones
+    ("OPERATOR", r"[+\-*/^]"),  # Operadores aritméticos con precedencia
+    ("LPAREN", r"\("),  # Paréntesis izquierdo para agrupación
+    ("RPAREN", r"\)"),  # Paréntesis derecho para agrupación
+    ("SKIP", r"[ \t]+"),  # Espacios en blanco que se ignoran
+]
+
+# Se compila la expresión regular una vez para evitar recompilaciones repetidas durante la tokenización
+_TOKEN_REGEX = re.compile("|".join(f"(?P<{name}>{pattern})" for name, pattern in _TOKEN_SPEC))
+
 
 class Token:
     def __init__(self, type_: str, value: str) -> None:
@@ -48,23 +62,10 @@ def tokenize(expression: str) -> List[Token]:
     if not expression.strip():
         raise ValueError("La expresión no puede estar vacía")
 
-    # Definición de patrones de tokens basada en la gramática de expresiones matemáticas
-    # Se utiliza orden específico para evitar conflictos entre patrones similares
-    token_spec = [
-        ("NUMBER", r"\d+(\.\d+)?"),  # Números enteros y decimales
-        ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_]*"),  # Variables y funciones
-        ("OPERATOR", r"[+\-*/^]"),  # Operadores aritméticos con precedencia
-        ("LPAREN", r"\("),  # Paréntesis izquierdo para agrupación
-        ("RPAREN", r"\)"),  # Paréntesis derecho para agrupación
-        ("SKIP", r"[ \t]+"),  # Espacios en blanco que se ignoran
-    ]
-
-    # Compilación de la expresión regular combinada para mayor eficiencia
-    token_regex = "|".join(f"(?P<{name}>{pattern})" for name, pattern in token_spec)
     tokens: List[Token] = []
     last_end = 0
 
-    for match in re.finditer(token_regex, expression):
+    for match in _TOKEN_REGEX.finditer(expression):
         # Asegura que no hay caracteres inválidos entre tokens
         # Esto previene errores de tokenización que podrían pasar desapercibidos
         if match.start() != last_end:
@@ -72,13 +73,11 @@ def tokenize(expression: str) -> List[Token]:
             raise ValueError(f"Caracter no reconocido: '{invalid_char}' en posición {last_end}")
 
         kind = match.lastgroup
-        value = match.group()
-
         if kind is None or kind == "SKIP":
             last_end = match.end()
             continue
 
-        tokens.append(Token(kind, value))
+        tokens.append(Token(kind, match.group()))
         last_end = match.end()
 
     # Asegura que toda la expresión fue tokenizada
