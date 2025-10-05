@@ -57,28 +57,22 @@ class TestPreefixConversion:
 
 class TestVariableExtraction:
     def test_extract_single_variable(self):
-        assert extract_variables("A + 1") == ["A"]
-
-    def test_extract_multiple_variables(self):
-        assert extract_variables("A + B") == ["A", "B"]
+        assert extract_variables("A + 1") == ("A",)
 
     def test_extract_many_variables(self):
-        assert extract_variables("A + B + C + D + D") == ["A", "B", "C", "D"]
+        assert extract_variables("(A + B) * C ^ D - E") == ("A", "B", "C", "D", "E")
 
     def test_extract_duplicates(self):
         """Las variables duplicadas deben aparecer una sola vez."""
-        assert extract_variables("A + A * B") == ["A", "B"]
+        assert extract_variables("A + A * B") == ("A", "B")
 
     def test_extract_no_variables(self):
         """Expresiones con solo números no tienen variables."""
-        assert extract_variables("1 + 2 * 3") == []
-
-    def test_extract_complex_expression(self):
-        assert extract_variables("(A + B) * C ^ D - E") == ["A", "B", "C", "D", "E"]
+        assert extract_variables("1 + 2 * 3") == ()
 
     def test_alphabetical_order(self):
         """Las variables deben retornarse en orden alfabético."""
-        assert extract_variables("Z + A + M") == ["A", "M", "Z"]
+        assert extract_variables("Z + A + M") == ("A", "M", "Z")
 
 
 class TestPostfixEvaluation:
