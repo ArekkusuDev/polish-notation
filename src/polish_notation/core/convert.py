@@ -99,12 +99,13 @@ def convert_to_prefix(expression: str) -> str:
     return ast_to_prefix(ast)
 
 
-def extract_variables(expression: str) -> list[str]:
+@lru_cache(maxsize=128)
+def extract_variables(expression: str) -> Tuple[str, ...]:
     """
     Extrae todas las variables únicas de una expresión infija.
 
     Las variables se identifican como tokens de tipo IDENTIFIER y se retornan
-    en orden lexicográfico para mantener consistencia en la interfaz de usuario.
+    en orden mantener consistencia en la interfaz de usuario.
 
     Args:
         expression: Expresión matemática en notación infija.
@@ -123,7 +124,7 @@ def extract_variables(expression: str) -> list[str]:
     tokens = tokenize(expression)
     # Usar set para eliminar duplicados, luego ordenar alfabéticamente
     variables = {token.value for token in tokens if token.type == "IDENTIFIER"}
-    return sorted(variables)
+    return tuple(sorted(variables))
 
 
 def evaluate_postfix(postfix: str, variables: Mapping[str, float | int]) -> float:
