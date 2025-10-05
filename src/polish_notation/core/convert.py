@@ -149,16 +149,12 @@ def evaluate_postfix(postfix: str, variables: Mapping[str, float | int]) -> floa
         >>> evaluate_postfix("A B C * +", {"A": 1, "B": 2, "C": 3})
         7.0
     """
+    OPERATORS = {"+", "-", "*", "/", "^"}
     stack: List[float] = []
     tokens = postfix.split()
 
     for token in tokens:
-        if token in variables:
-            stack.append(variables[token])
-        elif token.replace(".", "", 1).replace("-", "", 1).isdigit():
-            # Soporte para números flotantes y negativos
-            stack.append(float(token))
-        elif token in "+-*/^":
+        if token in OPERATORS:
             if len(stack) < 2:
                 raise ValueError(f"Operador '{token}' requiere al menos dos operandos")
             b = stack.pop()
@@ -175,11 +171,15 @@ def evaluate_postfix(postfix: str, variables: Mapping[str, float | int]) -> floa
                 stack.append(a / b)
             elif token == "^":
                 stack.append(a**b)
-        elif token.isidentifier():
-            # Es una variable válida pero no está en el diccionario
-            raise KeyError(f"Variable '{token}' no definida en el diccionario de valores")
+        elif token in variables:
+            stack.append(float(variables[token]))
         else:
-            raise ValueError(f"Token inválido: '{token}'")
+            try:
+                stack.append(float(token))
+            except ValueError:
+                if token.isidentifier():
+                    raise KeyError(f"Variable '{token}' no definida")
+                raise ValueError(f"Token inválido: '{token}'")
 
     if len(stack) != 1:
         raise ValueError("Expresión postfija malformada: operandos restantes en la pila")
