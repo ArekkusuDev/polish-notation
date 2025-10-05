@@ -1,24 +1,22 @@
+import re
 from collections.abc import Mapping
-from typing import List
+from functools import lru_cache
+from typing import List, Tuple
 
 from .lexer import tokenize
 from .models import ASTNode, BinaryOp, Identifier, Number
 from .parser import parse_expression
+
+_PRECEDENCE = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
+_RIGHT_ASSOCIATIVE = {"^"}
+_NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
 
 
 def _is_operand(token: str) -> bool:
     """
     Verifica si el token es un operando válido (número o identificador).
     """
-    # Validar números flotantes
-    try:
-        float(token)
-        return True
-    except ValueError:
-        pass
-
-    # Validar identificadores (letras y dígitos, comenzando con letra)
-    return token.isidentifier()
+    return bool(_NUMBER_PATTERN.match(token)) or token.isidentifier()
 
 
 def infix_to_postfix(tokens: List[str]) -> str:
@@ -31,18 +29,17 @@ def infix_to_postfix(tokens: List[str]) -> str:
     """
     output: List[str] = []
     operators: List[str] = []
-    precedence = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
 
     for token in tokens:
         if _is_operand(token):
             output.append(token)
-        elif token in precedence:
+        elif token in _PRECEDENCE:
             # Manejar asociatividad derecha para ^
             while (
                 operators
                 and operators[-1] != "("
-                and precedence.get(operators[-1], 0) >= precedence[token]
-                and not (token == "^" and operators[-1] == "^")
+                and _PRECEDENCE.get(operators[-1], 0) >= _PRECEDENCE[token]
+                and token not in _RIGHT_ASSOCIATIVE
             ):  # ^ es asociativo derecho
                 output.append(operators.pop())
             operators.append(token)
