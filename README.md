@@ -1,9 +1,8 @@
 # Generador de Notación Prefija y Postfija (a partir de Expresiones Infijas)
 
-Pequeña aplicación TUI construida con [Textual](https://github.com/Textualize/textual) para:
+Simple CLI construida con [questionary](https://github.com/tmbo/questionary) para:
 - Ingresar una expresión en notación infija.
 - Ver su conversión a notación postfija (Notación Polaca Inversa) y prefija (Notación Polaca).
-- Visualizar pasos intermedios.
 
 ## Objetivo
 Servir como herramienta educativa para cursos de Lenguajes y Autómatas, mostrando el uso de pilas en el proceso de conversión de expresiones.
@@ -15,10 +14,10 @@ Servir como herramienta educativa para cursos de Lenguajes y Autómatas, mostran
 - Conversión:
   - Infix -> Postfix (Shunting Yard)
   - Infix -> Prefix (inversión + árbol de expresión)
-- Interfaz TUI con:
-  - Campo de entrada
-  - Panel de resultados
-  - Registro de errores
+- Evaluación de expresiones postfijas con sustitución de variables.
+- CLI interactiva con:
+  - Entrada de expresión
+  - Resultados claros
 
 ## Requisitos
 - Python 3.13+
@@ -33,7 +32,7 @@ uv sync
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-Dentro de la TUI:
+En la CLI
 - Escribe: (A + B) * C ^ D - E
 - Resultado Postfijo: A B + C D ^ * E -
 - Resultado Prefijo: - * + A B ^ C D E
@@ -41,9 +40,7 @@ Dentro de la TUI:
 ## Estructura Propuesta
 ```
 app/
-  __init__.py
-  main.py          # Punto de entrada
-  ui/              # Vistas / widgets
+  __init__.py      # Punto de entrada
   core/
     lexer.py       # Tokenización
     parser.py      # Validación / árbol
@@ -61,7 +58,8 @@ tests/
 - [x] Implementar conversión a postfija (Shunting Yard)
 - [x] Implementar conversión a prefija (AST o método invertido)
 - [x] Añadir manejo de errores con mensajes claros
-- [ ] Diseñar TUI mínima (entrada + salida)
+- [ ] Implementar evaluación de expresiones postfijas con sustitución de variables
+- [ ] Implementar CLI interactiva con questionary
 - [ ] Añadir modo "paso a paso" (cola de operadores / pila)
 - [x] Pruebas unitarias de casos simples
 - [x] Soporte de números multi-dígito
