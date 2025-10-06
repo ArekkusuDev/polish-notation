@@ -6,8 +6,11 @@ from rich.table import Table
 
 from .core.convert import convert_to_postfix, convert_to_prefix, evaluate_postfix, extract_variables
 
+type PostfixValues = Dict[str, Union[int, float]]
+console = Console()
 
-def _draw_table(console: Console, expr: str, postfix: str, prefix: str) -> None:
+
+def _draw_table(expr: str, postfix: str, prefix: str) -> None:
     """Dibuja una tabla con las conversiones de notación."""
 
     # infix is the same without parentheses
@@ -18,16 +21,20 @@ def _draw_table(console: Console, expr: str, postfix: str, prefix: str) -> None:
         show_header=True,
         header_style="bold magenta",
     )
-    table.add_column("Infija", style="white", justify="center")
+    table.add_column("Infija", style="magenta", justify="center")
     table.add_column("Prefija (NP)", style="blue", justify="center")
     table.add_column("Postfija (NPI)", style="green", justify="center")
     table.add_row(infix, prefix, postfix)
     console.print(table, justify="center")
 
 
+def _eval(p: str, v: PostfixValues = {}) -> None:
+    result = evaluate_postfix(p, v)
+    console.print(f"\n[bold green]Resultado: {result}[/bold green]\n", justify="center")
+
+
 def main() -> None:
     """Punto de entrada para la aplicación de notación polaca."""
-    console = Console()
 
     while True:
         expr = questionary.text("Ingresa una expresión infija ('q' para salir):").ask()
@@ -54,7 +61,7 @@ def main() -> None:
             )
             if variables:
                 console.print("\n[bold cyan]Ingresa los valores para las variables:[/bold cyan]")
-                values: Dict[str, Union[float, int]] = {}
+                values: PostfixValues = {}
                 cancelled = False
 
                 for var in sorted(list(variables)):
@@ -72,13 +79,11 @@ def main() -> None:
                         break
 
                 if not cancelled:
-                    result = evaluate_postfix(postfix, values)
-                    _draw_table(console, expr, postfix, prefix)
-                    console.print(f"\n[bold green]Resultado: {result}[/bold green]\n", justify="center")
+                    _draw_table(expr, postfix, prefix)
+                    _eval(postfix, values)
             else:
-                result = evaluate_postfix(postfix, {})
-                _draw_table(console, expr, postfix, prefix)
-                console.print(f"\n[bold green]Resultado: {result}[/bold green]\n", justify="center")
+                _draw_table(expr, postfix, prefix)
+                _eval(postfix)
 
         except Exception as e:
             console.print(f"[bold red]Error: {e}[/bold red]\n")
