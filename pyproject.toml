@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.13"
 dependencies = [
-    "textual>=6.2.1",
+    "questionary>=2.1.1",
 ]
 
 [project.scripts]
@@ -24,5 +24,4 @@ dev = [
   "pre-commit>=4.3.0",
   "pytest>=8.4.2",
   "ruff>=0.13.3",
-  "textual-dev>=1.7.0",
 ]
