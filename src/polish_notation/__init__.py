@@ -30,7 +30,12 @@ def _draw_table(expr: str, postfix: str, prefix: str) -> None:
 
 def _eval(p: str, v: PostfixValues = {}) -> None:
     result = evaluate_postfix(p, v)
-    console.print(f"\n[bold green]Resultado: {result}[/bold green]\n", justify="center")
+    # replace postfix values in the output without mutating the original string
+    postfix = p
+    for var, val in v.items():
+        postfix = postfix.replace(var, str(val))
+    console.print(f"[bold yellow]Evaluando NPI:[/bold yellow] [bold white]{p}[/bold white]", justify="center")
+    console.print(f"[bold green][{postfix}] = {result}[/bold green]\n", justify="center")
 
 
 def main() -> None:
