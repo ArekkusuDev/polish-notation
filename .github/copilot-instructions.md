@@ -1,14 +1,13 @@
 # Lenguajes y Autómatas 2 (7A - 2025B) - Actividad 4
 
 ## Project Overview
-Educational TUI application for converting infix mathematical expressions to postfix (Reverse Polish Notation) and prefix (Polish Notation). Built with Textual framework to demonstrate stack-based algorithms for Languages and Automata courses.
+Educational python project for converting infix mathematical expressions to postfix (Reverse Polish Notation) and prefix (Polish Notation).
 
 ## Architecture
 Follow the proposed structure from README.md:
 ```
 src/polish_notation/
 ├── main.py              # Entry point
-├── ui/                  # Textual widgets and views
 └── core/                # Algorithm implementations
     ├── lexer.py         # Tokenization
     ├── parser.py        # Syntax validation and AST
@@ -25,9 +24,7 @@ src/polish_notation/
 
 ## Key Patterns
 - **Spanish Naming**: Use Spanish for comments, docstrings, and educational content
-- **Textual TUI**: Follow Textual patterns for reactive UI components
 - **Python Best Practices**: Follow Python best practices and write Pythonic code
-- **Educational Focus**: Include step-by-step algorithm visualization
 - **Error Handling**: Clear error messages for invalid expressions
 - **Comments**: Never write comments that explain what the code does. Instead, write comments that explain why the code does what it does.
 
@@ -48,5 +45,5 @@ Prefix: - * + A B ^ C D E
 ```
 
 ## Dependencies
-- Textual (for TUI) - not yet added to pyproject.toml
+- [questionary](https://github.com/tmbo/questionary) for interactive CLI
 - Core logic should be framework-agnostic for testing
