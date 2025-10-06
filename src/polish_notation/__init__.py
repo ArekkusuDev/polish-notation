@@ -56,7 +56,13 @@ def main() -> None:
     """Punto de entrada para la aplicación de notación polaca."""
 
     while True:
-        expr = questionary.text("Ingresa una expresión infija ('/q' para salir):").ask()
+        expr = questionary.text(
+            "Ingresa una expresión infija ('/q' para salir):",
+            placeholder="A + B * (C - D)",
+            style=questionary.Style(
+                [("qmark", "fg:#89dceb bold"), ("answer", "fg:#cba6f7 bold")],
+            ),
+        ).ask()
         if expr is None or expr.strip().lower() == "/q":
             break
         elif expr.strip().lower() == "/c":
