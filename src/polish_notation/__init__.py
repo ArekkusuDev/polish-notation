@@ -38,13 +38,33 @@ def _eval(p: str, v: PostfixValues = {}) -> None:
     console.print(f"[bold green][{postfix}] = {result}[/bold green]\n", justify="center")
 
 
+def _help() -> None:
+    console.print(
+        """
+[bold cyan]Comandos disponibles:[/bold cyan]
+- Ingresa una expresión matemática en infija para convertirla y evaluarla.
+- Usa [bold]/q[/bold] para salir.
+- Usa [bold]/c[/bold] para limpiar la consola.
+- Puedes usar variables (letras) en la expresión y se te pedirá su valor.
+- Soporta operadores: [bold magenta]+, -, *, /, ^[/bold magenta] y paréntesis.
+        """,
+        justify="center",
+    )
+
+
 def main() -> None:
     """Punto de entrada para la aplicación de notación polaca."""
 
     while True:
-        expr = questionary.text("Ingresa una expresión infija ('q' para salir):").ask()
-        if expr is None or expr.lower() == "q":
+        expr = questionary.text("Ingresa una expresión infija ('/q' para salir):").ask()
+        if expr is None or expr.strip().lower() == "/q":
             break
+        elif expr.strip().lower() == "/c":
+            console.clear()
+            continue
+        elif expr.strip().lower() == "/h":
+            _help()
+            continue
 
         # Normalize input
         expr = str(expr).strip().upper()
