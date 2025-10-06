@@ -3,6 +3,7 @@
 Simple CLI construida con [questionary](https://github.com/tmbo/questionary) para:
 - Ingresar una expresión en notación infija.
 - Ver su conversión a notación postfija (Notación Polaca Inversa) y prefija (Notación Polaca).
+- Evaluar la expresión postfija con o sin valores para variables.
 
 ## Objetivo
 Servir como herramienta educativa para cursos de Lenguajes y Autómatas, mostrando el uso de pilas en el proceso de conversión de expresiones.
@@ -58,10 +59,8 @@ tests/
 - [x] Implementar conversión a postfija (Shunting Yard)
 - [x] Implementar conversión a prefija (AST o método invertido)
 - [x] Añadir manejo de errores con mensajes claros
-- [ ] Implementar evaluación de expresiones postfijas con sustitución de variables
-- [ ] Implementar CLI interactiva con questionary
+- [x] Implementar evaluación de expresiones postfijas con sustitución de variables
+- [x] Implementar CLI interactiva con questionary
 - [ ] Añadir modo "paso a paso" (cola de operadores / pila)
 - [x] Pruebas unitarias de casos simples
 - [x] Soporte de números multi-dígito
-- [ ] Soporte de funciones (sin, log, etc.) (futuro)
-- [ ] Documentar ejemplos avanzados
