@@ -1,6 +1,7 @@
 [project]
 name = "polish-notation"
 version = "0.1.0"
+classifiers = ["Private :: Do Not Upload"]
 description = "Polish Notation Converter"
 readme = "README.md"
 authors = [
