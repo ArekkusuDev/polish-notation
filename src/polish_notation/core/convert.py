@@ -105,7 +105,7 @@ def extract_variables(expression: str) -> Tuple[str, ...]:
     Extrae todas las variables únicas de una expresión infija.
 
     Las variables se identifican como tokens de tipo IDENTIFIER y se retornan
-    en orden mantener consistencia en la interfaz de usuario.
+    en orden para mantener consistencia en la interfaz de usuario.
 
     Args:
         expression: Expresión matemática en notación infija.
@@ -115,11 +115,11 @@ def extract_variables(expression: str) -> Tuple[str, ...]:
 
     Examples:
         >>> extract_variables("A + B")
-        ['A', 'B']
+        ('A', 'B')
         >>> extract_variables("A + B * C ^ D - E")
-        ['A', 'B', 'C', 'D', 'E']
+        ('A', 'B', 'C', 'D', 'E')
         >>> extract_variables("2 + 3 * 4")  # Sin variables
-        []
+        ()
     """
     tokens = tokenize(expression)
     # Usar set para eliminar duplicados, luego ordenar alfabéticamente
