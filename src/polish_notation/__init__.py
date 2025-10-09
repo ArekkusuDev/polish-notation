@@ -4,28 +4,55 @@ import questionary
 from rich.console import Console
 from rich.table import Table
 
-from .core.convert import convert_to_postfix, convert_to_prefix, evaluate_postfix, extract_variables
+from .core.convert import (
+    Quadruples,
+    Triples,
+    ast_to_quadruples,
+    ast_to_triples,
+    convert_to_postfix,
+    evaluate_postfix,
+    extract_variables,
+    parse_expression,
+)
 
 type PostfixValues = Dict[str, Union[int, float]]
 console = Console()
 
 
-def _draw_table(expr: str, postfix: str, prefix: str) -> None:
-    """Dibuja una tabla con las conversiones de notación."""
-
-    # infix is the same without parentheses
-    infix = expr.replace("(", "").replace(")", "")
-
-    table = Table(
-        title="\n[bold cyan]Conversión de Notación[/bold cyan]",
+def construct_table(title: str) -> Table:
+    return Table(
+        title=f"\n[bold cyan]{title}[/bold cyan]",
         show_header=True,
+        show_lines=True,
         header_style="bold magenta",
     )
-    table.add_column("Infija", style="magenta", justify="center")
-    table.add_column("Prefija (NP)", style="blue", justify="center")
-    table.add_column("Postfija (NPI)", style="green", justify="center")
-    table.add_row(infix, prefix, postfix)
+
+
+def _draw_triples_table(t: Triples) -> None:
+    """Muestra una tabla con la representación de triplos."""
+    table = construct_table("Triplos")
+    table.add_column("Ref", style="yellow", justify="center")
+    table.add_column("Operador", style="red", justify="center")
+    table.add_column("Arg 1", style="green", justify="center")
+    table.add_column("Arg 2", style="green", justify="center")
+
+    for i, (op, arg1, arg2) in enumerate(t, start=1):
+        table.add_row(str(f"({i})"), op, arg1, arg2)
     console.print(table, justify="center")
+
+
+def _draw_quadruples_table(q: Quadruples) -> None:
+    """Muestra una tabla con la representación de cuádruplos."""
+    table = construct_table("Cuádruplos")
+    table.add_column("Operador", style="red", justify="center")
+    table.add_column("Arg 1", style="green", justify="center")
+    table.add_column("Arg 2", style="green", justify="center")
+    table.add_column("Resultado", style="yellow", justify="center")
+
+    for op, arg1, arg2, result in q:
+        table.add_row(op, arg1, arg2, result)
+    console.print(table, justify="center")
+    pass
 
 
 def _eval(p: str, v: PostfixValues = {}) -> None:
@@ -34,7 +61,7 @@ def _eval(p: str, v: PostfixValues = {}) -> None:
     postfix = p
     for var, val in v.items():
         postfix = postfix.replace(var, str(val))
-    console.print(f"[bold yellow]Evaluando NPI:[/bold yellow] [bold white]{p}[/bold white]", justify="center")
+    console.print(f"\n[bold yellow]Evaluando NPI:[/bold yellow] [bold white]{p}[/bold white]", justify="center")
     console.print(f"[bold green][{postfix}] = {result}[/bold green]\n", justify="center")
 
 
@@ -73,15 +100,16 @@ def main() -> None:
             continue
 
         # Normalize input
-        expr = str(expr).strip().upper()
+        expr = str(expr).strip()
         if not expr:
             console.print("[bold red]Por favor, ingresa una expresión válida.[/bold red]\n")
             continue
 
         try:
             # Convert and evaluate
-            prefix = convert_to_prefix(expr)
             postfix = convert_to_postfix(expr)
+            triples = ast_to_triples(parse_expression(expr))
+            quadruples = ast_to_quadruples(parse_expression(expr))
 
             # get variable values from the user
             variables = extract_variables(expr)
@@ -110,10 +138,12 @@ def main() -> None:
                         break
 
                 if not cancelled:
-                    _draw_table(expr, postfix, prefix)
+                    _draw_triples_table(triples)
+                    _draw_quadruples_table(quadruples)
                     _eval(postfix, values)
             else:
-                _draw_table(expr, postfix, prefix)
+                _draw_triples_table(triples)
+                _draw_quadruples_table(quadruples)
                 _eval(postfix)
 
         except Exception as e:
