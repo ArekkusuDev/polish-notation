@@ -79,6 +79,45 @@ def _help() -> None:
     )
 
 
+def _process_expression(expr: str, values: PostfixValues) -> None:
+    """Procesa una expresión: convierte, genera triplos/cuádruplos y evalúa."""
+    postfix = convert_to_postfix(expr)
+    triples = ast_to_triples(parse_expression(expr))
+    quadruples = ast_to_quadruples(parse_expression(expr))
+
+    _draw_triples_table(triples)
+    _draw_quadruples_table(quadruples)
+    _eval(postfix, values)
+
+
+def _display_variables(variables: tuple[str, ...]) -> None:
+    """Muestra las variables encontradas en la expresión."""
+    console.print(
+        f"[bold yellow][+] Variables encontradas[/bold yellow]: [bold]{', '.join(variables)}[/bold]"
+        if variables
+        else "[bold yellow][!] No se encontraron variables.[/bold yellow]",
+    )
+
+
+def _collect_variable_values(variables: tuple[str, ...]) -> PostfixValues | None:
+    """Solicita al usuario los valores de las variables. Retorna None si se cancela."""
+    console.print("\n[bold cyan]Ingresa los valores para las variables:[/bold cyan]")
+    values: PostfixValues = {}
+
+    for var in list(variables):
+        while True:
+            val_str = questionary.text(f"  - Valor para {var}:").ask()
+            if val_str is None:
+                return None
+            try:
+                values[var] = float(val_str) if "." in val_str else int(val_str)
+                break
+            except ValueError:
+                console.print(f"[red]Valor inválido para {var}. Por favor, ingresa un número.[/red]")
+
+    return values
+
+
 def main() -> None:
     """Punto de entrada para la aplicación de notación polaca."""
 
