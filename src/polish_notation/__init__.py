@@ -129,6 +129,7 @@ def main() -> None:
                 [("qmark", "fg:#89dceb bold"), ("answer", "fg:#cba6f7 bold")],
             ),
         ).ask()
+
         if expr is None or expr.strip().lower() == "/q":
             break
         elif expr.strip().lower() == "/c":
@@ -138,52 +139,22 @@ def main() -> None:
             _help()
             continue
 
-        # Normalize input
         expr = str(expr).strip()
         if not expr:
             console.print("[bold red]Por favor, ingresa una expresión válida.[/bold red]\n")
             continue
 
         try:
-            # Convert and evaluate
-            postfix = convert_to_postfix(expr)
-            triples = ast_to_triples(parse_expression(expr))
-            quadruples = ast_to_quadruples(parse_expression(expr))
-
-            # get variable values from the user
             variables = extract_variables(expr)
-            console.print(
-                f"[bold yellow][+] Variables encontradas[/bold yellow]: [bold]{', '.join(variables)}[/bold]"
-                if variables
-                else "[bold yellow][!] No se encontraron variables.[/bold yellow]",
-            )
+            _display_variables(variables)
+
             if variables:
-                console.print("\n[bold cyan]Ingresa los valores para las variables:[/bold cyan]")
-                values: PostfixValues = {}
-                cancelled = False
-
-                for var in sorted(list(variables)):
-                    while True:
-                        val_str = questionary.text(f"  - Valor para {var}:").ask()
-                        if val_str is None:
-                            cancelled = True
-                            break
-                        try:
-                            values[var] = float(val_str) if "." in val_str else int(val_str)
-                            break
-                        except ValueError:
-                            console.print(f"[red]Valor inválido para {var}. Por favor, ingresa un número.[/red]")
-                    if cancelled:
-                        break
-
-                if not cancelled:
-                    _draw_triples_table(triples)
-                    _draw_quadruples_table(quadruples)
-                    _eval(postfix, values)
+                values = _collect_variable_values(variables)
+                if values is None:
+                    continue
+                _process_expression(expr, values)
             else:
-                _draw_triples_table(triples)
-                _draw_quadruples_table(quadruples)
-                _eval(postfix)
+                _process_expression(expr, {})
 
         except Exception as e:
             console.print(f"[bold red]Error: {e}[/bold red]\n")
