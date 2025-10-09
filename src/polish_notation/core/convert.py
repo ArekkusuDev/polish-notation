@@ -4,14 +4,14 @@ from functools import lru_cache
 from typing import List, Tuple
 
 from .lexer import tokenize
-from .models import ASTNode, BinaryOp, Identifier, Number
+from .models import Assignment, ASTNode, BinaryOp, Identifier, Number
 from .parser import parse_expression
 
 type Quadruples = List[Tuple[str, str, str, str]]
 type Triples = List[Tuple[str, str, str]]
 
-_PRECEDENCE = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
-_RIGHT_ASSOCIATIVE = {"^"}
+_PRECEDENCE = {"=": 0, "+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
+_RIGHT_ASSOCIATIVE = {"^", "="}
 _NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
 
 
@@ -37,13 +37,13 @@ def infix_to_postfix(tokens: List[str]) -> str:
         if _is_operand(token):
             output.append(token)
         elif token in _PRECEDENCE:
-            # Manejar asociatividad derecha para ^
+            # Manejar asociatividad derecha para ^ y =
             while (
                 operators
                 and operators[-1] != "("
                 and _PRECEDENCE.get(operators[-1], 0) >= _PRECEDENCE[token]
                 and token not in _RIGHT_ASSOCIATIVE
-            ):  # ^ es asociativo derecho
+            ):
                 output.append(operators.pop())
             operators.append(token)
         elif token == "(":
@@ -80,6 +80,10 @@ def ast_to_prefix(node: ASTNode) -> str:
             parts.append(str(n.value))
         elif isinstance(n, Identifier):
             parts.append(n.name)
+        elif isinstance(n, Assignment):
+            parts.append("=")
+            _traverse(n.target)
+            _traverse(n.value)
         elif isinstance(n, BinaryOp):
             parts.append(n.op)
             _traverse(n.left)
@@ -106,6 +110,11 @@ def ast_to_quadruples(node: ASTNode) -> Quadruples:
             return str(n.value)
         if isinstance(n, Identifier):
             return n.name
+        if isinstance(n, Assignment):
+            target = n.target.name
+            value = traverse(n.value)
+            quads.append(("=", value, "", target))
+            return target
         if isinstance(n, BinaryOp):
             left = traverse(n.left)
             right = traverse(n.right)
@@ -127,6 +136,13 @@ def ast_to_triples(node: ASTNode) -> Triples:
             return str(n.value)
         if isinstance(n, Identifier):
             return n.name
+        if isinstance(n, Assignment):
+            target = n.target.name
+            value = traverse(n.value)
+            # The "result" of a triple is its index in the list
+            result_index = len(triples) + 1
+            triples.append(("=", target, value))
+            return f"({result_index})"  # Pointer to the result
         if isinstance(n, BinaryOp):
             left = traverse(n.left)
             right = traverse(n.right)
@@ -159,6 +175,9 @@ def extract_variables(expression: str) -> Tuple[str, ...]:
     Las variables se identifican como tokens de tipo IDENTIFIER y se retornan
     en orden para mantener consistencia en la interfaz de usuario.
 
+    Nota: En asignaciones (A = B + C), solo se extraen las variables del lado derecho (B, C),
+    no el identificador de destino (A).
+
     Args:
         expression: Expresión matemática en notación infija.
 
@@ -172,10 +191,24 @@ def extract_variables(expression: str) -> Tuple[str, ...]:
         ('A', 'B', 'C', 'D', 'E')
         >>> extract_variables("2 + 3 * 4")  # Sin variables
         ()
+        >>> extract_variables("A = B + C")  # Solo B y C, no A
+        ('B', 'C')
     """
-    tokens = tokenize(expression)
-    # Usar set para eliminar duplicados, luego ordenar alfabéticamente
-    variables = {token.value for token in tokens if token.type == "IDENTIFIER"}
+    ast = parse_expression(expression)
+    variables: set[str] = set()
+
+    def _collect_variables(node: ASTNode) -> None:
+        if isinstance(node, Identifier):
+            variables.add(node.name)
+        elif isinstance(node, Assignment):
+            # Solo extraer variables del lado derecho, no del target
+            _collect_variables(node.value)
+        elif isinstance(node, BinaryOp):
+            _collect_variables(node.left)
+            _collect_variables(node.right)
+        # Number nodes no contribuyen variables
+
+    _collect_variables(ast)
     return tuple(sorted(variables))
 
 
@@ -246,6 +279,9 @@ def evaluate_expression(expression: str, variable_values: Mapping[str, float | i
     Convierte primero la expresión a notación postfija y luego la evalúa,
     demostrando el flujo completo: infix → postfix → resultado.
 
+    Nota: Si la expresión contiene una asignación (A = B + C), solo se evalúa
+    el lado derecho (B + C). El operador de asignación no se evalúa.
+
     Args:
         expression: Expresión matemática en notación infija (ej. "A + B * C").
         variable_values: Diccionario con valores para cada variable.
@@ -262,6 +298,8 @@ def evaluate_expression(expression: str, variable_values: Mapping[str, float | i
         3.0
         >>> evaluate_expression("(A + B) * C", {"A": 1, "B": 2, "C": 3})
         9.0
+        >>> evaluate_expression("A = B + C", {"B": 2, "C": 3})  # Solo evalúa B + C
+        5.0
     """
     # Validar que todas las variables necesarias tienen valores
     required_vars = extract_variables(expression)
@@ -269,5 +307,27 @@ def evaluate_expression(expression: str, variable_values: Mapping[str, float | i
     if missing_vars:
         raise KeyError(f"Faltan valores para las variables: {', '.join(missing_vars)}")
 
-    postfix = convert_to_postfix(expression)
+    # Parsear para detectar si hay asignación
+    ast = parse_expression(expression)
+    postfix = ast_to_postfix_from_ast(ast)
     return evaluate_postfix(postfix, variable_values)
+
+
+def ast_to_postfix_from_ast(node: ASTNode) -> str:
+    """Convierte un AST directamente a postfix (sin pasar por tokens)."""
+    parts: List[str] = []
+
+    def _traverse(n: ASTNode) -> None:
+        if isinstance(n, Number):
+            parts.append(str(n.value))
+        elif isinstance(n, Identifier):
+            parts.append(n.name)
+        elif isinstance(n, BinaryOp):
+            _traverse(n.left)
+            _traverse(n.right)
+            parts.append(n.op)
+        else:
+            raise ValueError(f"Tipo de nodo desconocido: {type(n)}")
+
+    _traverse(node)
+    return " ".join(parts)
