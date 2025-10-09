@@ -7,6 +7,9 @@ from .lexer import tokenize
 from .models import ASTNode, BinaryOp, Identifier, Number
 from .parser import parse_expression
 
+type Quadruples = List[Tuple[str, str, str, str]]
+type Triples = List[Tuple[str, str, str]]
+
 _PRECEDENCE = {"+": 1, "-": 1, "*": 2, "/": 2, "^": 3}
 _RIGHT_ASSOCIATIVE = {"^"}
 _NUMBER_PATTERN = re.compile(r"^-?\d+(\.\d+)?$")
@@ -86,6 +89,55 @@ def ast_to_prefix(node: ASTNode) -> str:
 
     _traverse(node)
     return " ".join(parts)
+
+
+def ast_to_quadruples(node: ASTNode) -> Quadruples:
+    """Generates quadruples from an AST."""
+    quads: Quadruples = []
+    temp_counter = 0
+
+    def new_temp():
+        nonlocal temp_counter
+        temp_counter += 1
+        return f"T{temp_counter}"
+
+    def traverse(n: ASTNode) -> str:
+        if isinstance(n, Number):
+            return str(n.value)
+        if isinstance(n, Identifier):
+            return n.name
+        if isinstance(n, BinaryOp):
+            left = traverse(n.left)
+            right = traverse(n.right)
+            result = new_temp()
+            quads.append((n.op, left, right, result))
+            return result
+        raise TypeError(f"Unknown node type: {type(n)}")
+
+    traverse(node)
+    return quads
+
+
+def ast_to_triples(node: ASTNode) -> Triples:
+    """Generates triples from an AST."""
+    triples: Triples = []
+
+    def traverse(n: ASTNode) -> str:
+        if isinstance(n, Number):
+            return str(n.value)
+        if isinstance(n, Identifier):
+            return n.name
+        if isinstance(n, BinaryOp):
+            left = traverse(n.left)
+            right = traverse(n.right)
+            # The "result" of a triple is its index in the list
+            result_index = len(triples) + 1
+            triples.append((n.op, left, right))
+            return f"({result_index})"  # Pointer to the result
+        raise TypeError(f"Unknown node type: {type(n)}")
+
+    traverse(node)
+    return triples
 
 
 def convert_to_postfix(expression: str) -> str:
