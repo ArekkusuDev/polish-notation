@@ -43,7 +43,34 @@ class Parser:
         Returns:
             ASTNode: El nodo raíz del AST de la expresión.
         """
-        return self.additive()
+        return self.assignment()
+
+    def assignment(self) -> ASTNode:
+        """
+        Analiza expresiones con operador de asignación (=).
+
+        Maneja la asociatividad derecha del operador de asignación.
+        La asignación solo es válida cuando el lado izquierdo es un identificador.
+
+        Returns:
+            ASTNode: El nodo del AST para la asignación o una expresión aditiva.
+
+        Raises:
+            ValueError: Si el lado izquierdo de la asignación no es un identificador.
+        """
+        node = self.additive()
+
+        token = self.current()
+        if token and token.type == "ASSIGN":
+            # Validar que el lado izquierdo sea un identificador
+            if not isinstance(node, Identifier):
+                raise ValueError("El lado izquierdo de una asignación debe ser un identificador")
+
+            self.advance()
+            value = self.assignment()  # Right associative: A = B = C
+            node = Assignment(node, value)
+
+        return node
 
     def additive(self) -> ASTNode:
         """

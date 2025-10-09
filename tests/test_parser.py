@@ -28,3 +28,40 @@ class TestParseExpression:
     def test_parse_empty_expression(self):
         with pytest.raises(ValueError, match="vacía"):
             parse_expression("")
+
+    def test_parse_assignment(self):
+        """Prueba análisis de asignación simple."""
+        ast = parse_expression("A = B + C")
+        assert isinstance(ast, Assignment)
+        assert isinstance(ast.target, Identifier)
+        assert ast.target.name == "A"
+        assert isinstance(ast.value, BinaryOp)
+        assert ast.value.op == "+"
+        assert isinstance(ast.value.left, Identifier) and ast.value.left.name == "B"
+        assert isinstance(ast.value.right, Identifier) and ast.value.right.name == "C"
+
+    def test_parse_chained_assignment(self):
+        """Prueba análisis de asignaciones encadenadas (asociatividad derecha)."""
+        ast = parse_expression("A = B = C")
+        assert isinstance(ast, Assignment)
+        assert ast.target.name == "A"
+        assert isinstance(ast.value, Assignment)
+        assert ast.value.target.name == "B"
+        assert isinstance(ast.value.value, Identifier)
+        assert ast.value.value.name == "C"
+
+    def test_parse_assignment_with_expression(self):
+        """Prueba asignación con expresión compleja."""
+        ast = parse_expression("X = A * B + C")
+        assert isinstance(ast, Assignment)
+        assert ast.target.name == "X"
+        assert isinstance(ast.value, BinaryOp)
+        assert ast.value.op == "+"
+
+    def test_invalid_assignment_target(self):
+        """Prueba que falle cuando el lado izquierdo no es un identificador."""
+        with pytest.raises(ValueError, match="identificador"):
+            parse_expression("(A + B) = C")
+
+        with pytest.raises(ValueError, match="identificador"):
+            parse_expression("5 = A")
