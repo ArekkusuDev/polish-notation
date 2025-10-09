@@ -9,7 +9,7 @@ from polish_notation.core.convert import (
     evaluate_postfix,
     extract_variables,
 )
-from polish_notation.core.models import BinaryOp, Identifier, Number, UnaryOp
+from polish_notation.core.models import Assignment, BinaryOp, Identifier, Number, UnaryOp
 
 
 class TestPostfixConversion:

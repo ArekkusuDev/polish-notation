@@ -1,6 +1,6 @@
 import pytest
 
-from polish_notation.core.models import BinaryOp, Identifier, Number
+from polish_notation.core.models import Assignment, BinaryOp, Identifier, Number
 from polish_notation.core.parser import parse_expression
 
 

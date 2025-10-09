@@ -5,6 +5,15 @@ class ASTNode:
     pass
 
 
+class Assignment(ASTNode):
+    def __init__(self, target: "Identifier", value: ASTNode):
+        self.target = target
+        self.value = value
+
+    def __repr__(self) -> str:
+        return f"Assignment({self.target}, {self.value})"
+
+
 class BinaryOp(ASTNode):
     def __init__(self, left: ASTNode, op: str, right: ASTNode):
         self.left = left

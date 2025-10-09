@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 from .lexer import Token, tokenize
-from .models import ASTNode, BinaryOp, Identifier, Number
+from .models import Assignment, ASTNode, BinaryOp, Identifier, Number
 
 
 class Parser:

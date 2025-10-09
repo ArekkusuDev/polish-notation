@@ -6,6 +6,7 @@ from typing import List
 _TOKEN_SPEC = [
     ("NUMBER", r"\d+(\.\d+)?"),  # Números enteros y decimales
     ("IDENTIFIER", r"[a-zA-Z_][a-zA-Z0-9_]*"),  # Variables y funciones
+    ("ASSIGN", r"="),  # Operador de asignación
     ("OPERATOR", r"[+\-*/^]"),  # Operadores aritméticos con precedencia
     ("LPAREN", r"\("),  # Paréntesis izquierdo para agrupación
     ("RPAREN", r"\)"),  # Paréntesis derecho para agrupación
