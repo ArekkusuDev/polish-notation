@@ -38,6 +38,18 @@ class TestPostfixConversion:
         with pytest.raises(ValueError, match="no reconocido"):
             convert_to_postfix("A + B & C")
 
+    def test_assignment(self):
+        """Prueba conversión de asignación a postfijo."""
+        assert convert_to_postfix("A = B + C") == "A B C + ="
+
+    def test_chained_assignment(self):
+        """Prueba conversión de asignaciones encadenadas."""
+        assert convert_to_postfix("A = B = C") == "A B C = ="
+
+    def test_assignment_with_expression(self):
+        """Prueba asignación con expresión compleja."""
+        assert convert_to_postfix("X = A * B + C") == "X A B * C + ="
+
 
 class TestPreefixConversion:
     def test_basic_addition(self):
@@ -56,6 +68,18 @@ class TestPreefixConversion:
         expr = "A + B * (C ^ D - E) ^ (F + G * H) - I"
         expected = "- + A * B ^ - ^ C D E + F * G H I"
         assert convert_to_prefix(expr) == expected
+
+    def test_assignment(self):
+        """Prueba conversión de asignación a prefijo."""
+        assert convert_to_prefix("A = B + C") == "= A + B C"
+
+    def test_chained_assignment(self):
+        """Prueba conversión de asignaciones encadenadas."""
+        assert convert_to_prefix("A = B = C") == "= A = B C"
+
+    def test_assignment_with_expression(self):
+        """Prueba asignación con expresión compleja."""
+        assert convert_to_prefix("X = A * B + C") == "= X + * A B C"
 
 
 class TestVariableExtraction:
@@ -76,6 +100,18 @@ class TestVariableExtraction:
     def test_alphabetical_order(self):
         """Las variables deben retornarse en orden alfabético."""
         assert extract_variables("Z + A + M") == ("A", "M", "Z")
+
+    def test_extract_assignment_only_right_side(self):
+        """En asignaciones, solo se extraen variables del lado derecho."""
+        assert extract_variables("A = B + C") == ("B", "C")
+
+    def test_extract_chained_assignment(self):
+        """En asignaciones encadenadas, solo se extrae la última variable."""
+        assert extract_variables("A = B = C") == ("C",)
+
+    def test_extract_assignment_with_expression(self):
+        """En asignaciones con expresiones complejas, solo lado derecho."""
+        assert extract_variables("X = A * B + C") == ("A", "B", "C")
 
 
 class TestPostfixEvaluation:
@@ -207,6 +243,25 @@ class TestQuadruples:
         with pytest.raises(TypeError, match="Unknown node type"):
             quads = ast_to_quadruples(node)
             print(f"Unary op quadruples (should fail): {quads}")
+
+    def test_assignment_quadruples(self):
+        """Prueba generación de cuádruplos para asignación: A = B + C"""
+        # A = B + C debería generar: ('+', 'B', 'C', 'T1'), ('=', 'T1', '', 'A')
+        node = Assignment(Identifier("A"), BinaryOp(Identifier("B"), "+", Identifier("C")))
+        quads = ast_to_quadruples(node)
+        print(f"Assignment quadruples: {quads}")
+        expected = [("+", "B", "C", "T1"), ("=", "T1", "", "A")]
+        assert quads == expected
+
+    def test_assignment_with_complex_expr(self):
+        """Prueba asignación con expresión compleja: X = A * B + C"""
+        # X = A * B + C debería generar: ('*', 'A', 'B', 'T1'), ('+', 'T1', 'C', 'T2'), ('=', 'T2', '', 'X')
+        expr_node = BinaryOp(BinaryOp(Identifier("A"), "*", Identifier("B")), "+", Identifier("C"))
+        node = Assignment(Identifier("X"), expr_node)
+        quads = ast_to_quadruples(node)
+        print(f"Complex assignment quadruples: {quads}")
+        expected = [("*", "A", "B", "T1"), ("+", "T1", "C", "T2"), ("=", "T2", "", "X")]
+        assert quads == expected
 
 
 class TestTriples:
