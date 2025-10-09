@@ -1,12 +1,15 @@
 import pytest
 
 from polish_notation.core.convert import (
+    ast_to_quadruples,
+    ast_to_triples,
     convert_to_postfix,
     convert_to_prefix,
     evaluate_expression,
     evaluate_postfix,
     extract_variables,
 )
+from polish_notation.core.models import BinaryOp, Identifier, Number, UnaryOp
 
 
 class TestPostfixConversion:
@@ -167,3 +170,77 @@ class TestExpressionEvaluation:
         expr = "A + B + C + D"
         with pytest.raises(KeyError, match="Faltan valores.*C.*D"):
             evaluate_expression(expr, {"A": 1, "B": 2})  # Faltan C y D
+
+
+class TestQuadruples:
+    def test_simple_addition(self):
+        # A + B
+        node = BinaryOp(Identifier("A"), "+", Identifier("B"))
+        quads = ast_to_quadruples(node)
+        print(f"Simple addition quadruples: {quads}")
+        assert quads == [("+", "A", "B", "T1")]
+
+    def test_complex_expression(self):
+        # (A + B) * (C - D)
+        left = BinaryOp(Identifier("A"), "+", Identifier("B"))
+        right = BinaryOp(Identifier("C"), "-", Identifier("D"))
+        node = BinaryOp(left, "*", right)
+        quads = ast_to_quadruples(node)
+        print(f"Complex expression quadruples: {quads}")
+        expected = [
+            ("+", "A", "B", "T1"),
+            ("-", "C", "D", "T2"),
+            ("*", "T1", "T2", "T3"),
+        ]
+        assert quads == expected
+
+    def test_with_numbers(self):
+        # 1 + 2
+        node = BinaryOp(Number(1), "+", Number(2))
+        quads = ast_to_quadruples(node)
+        print(f"With numbers quadruples: {quads}")
+        assert quads == [("+", "1", "2", "T1")]
+
+    def test_unary_op_fails(self):
+        # UnaryOp not handled, should raise TypeError
+        node = UnaryOp("-", Identifier("A"))
+        with pytest.raises(TypeError, match="Unknown node type"):
+            quads = ast_to_quadruples(node)
+            print(f"Unary op quadruples (should fail): {quads}")
+
+
+class TestTriples:
+    def test_simple_addition(self):
+        # A + B
+        node = BinaryOp(Identifier("A"), "+", Identifier("B"))
+        triples = ast_to_triples(node)
+        print(f"Simple addition triples: {triples}")
+        assert triples == [("+", "A", "B")]
+
+    def test_complex_expression(self):
+        # (A + B) * (C - D)
+        left = BinaryOp(Identifier("A"), "+", Identifier("B"))
+        right = BinaryOp(Identifier("C"), "-", Identifier("D"))
+        node = BinaryOp(left, "*", right)
+        triples = ast_to_triples(node)
+        print(f"Complex expression triples: {triples}")
+        expected = [
+            ("+", "A", "B"),
+            ("-", "C", "D"),
+            ("*", "(1)", "(2)"),
+        ]
+        assert triples == expected
+
+    def test_with_numbers(self):
+        # 1 + 2
+        node = BinaryOp(Number(1), "+", Number(2))
+        triples = ast_to_triples(node)
+        print(f"With numbers triples: {triples}")
+        assert triples == [("+", "1", "2")]
+
+    def test_unary_op_fails(self):
+        # UnaryOp not handled, should raise TypeError
+        node = UnaryOp("-", Identifier("A"))
+        with pytest.raises(TypeError, match="Unknown node type"):
+            triples = ast_to_triples(node)
+            print(f"Unary op triples (should fail): {triples}")
