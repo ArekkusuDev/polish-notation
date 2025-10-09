@@ -1,4 +1,4 @@
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 
 import questionary
 from rich.console import Console
@@ -7,6 +7,7 @@ from rich.table import Table
 from .core.convert import (
     Quadruples,
     Triples,
+    ast_to_postfix_from_ast,
     ast_to_quadruples,
     ast_to_triples,
     convert_to_postfix,
@@ -14,6 +15,7 @@ from .core.convert import (
     extract_variables,
     parse_expression,
 )
+from .core.models import Assignment
 
 type PostfixValues = Dict[str, Union[int, float]]
 console = Console()
@@ -55,14 +57,17 @@ def _draw_quadruples_table(q: Quadruples) -> None:
     pass
 
 
-def _eval(p: str, v: PostfixValues = {}) -> None:
-    result = evaluate_postfix(p, v)
+def _eval(p: str, toeval: str, v: PostfixValues = {}, target: Optional[str] = None) -> None:
+    result = evaluate_postfix(toeval, v)
     # replace postfix values in the output without mutating the original string
-    postfix = p
+    postfix = p if not target else toeval
     for var, val in v.items():
         postfix = postfix.replace(var, str(val))
     console.print(f"\n[bold yellow]Evaluando NPI:[/bold yellow] [bold white]{p}[/bold white]", justify="center")
-    console.print(f"[bold green][{postfix}] = {result}[/bold green]\n", justify="center")
+    if target:
+        console.print(f"[bold green]{target} = [{postfix}] = {result}[/bold green]\n", justify="center")
+    else:
+        console.print(f"[bold green][{postfix}] = {result}[/bold green]\n", justify="center")
 
 
 def _help() -> None:
@@ -81,13 +86,21 @@ def _help() -> None:
 
 def _process_expression(expr: str, values: PostfixValues) -> None:
     """Procesa una expresión: convierte, genera triplos/cuádruplos y evalúa."""
+    ast = parse_expression(expr)
+    isAssignment = isinstance(ast, Assignment)
+
     postfix = convert_to_postfix(expr)
     triples = ast_to_triples(parse_expression(expr))
     quadruples = ast_to_quadruples(parse_expression(expr))
 
     _draw_triples_table(triples)
     _draw_quadruples_table(quadruples)
-    _eval(postfix, values)
+    _eval(
+        postfix,
+        ast_to_postfix_from_ast(ast.value) if isAssignment else postfix,
+        values,
+        None if not isAssignment else ast.target.name,
+    )
 
 
 def _display_variables(variables: tuple[str, ...]) -> None:
