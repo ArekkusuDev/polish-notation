@@ -1,66 +1,47 @@
-# Generador de Notación Prefija y Postfija (a partir de Expresiones Infijas)
+# Polish Notation Converter (Infix -> Prefix/Postfix)
 
-Simple CLI construida con [questionary](https://github.com/tmbo/questionary) para:
-- Ingresar una expresión en notación infija.
-- Ver su conversión a notación postfija (Notación Polaca Inversa) y prefija (Notación Polaca).
-- Evaluar la expresión postfija con o sin valores para variables.
+A CLI tool that parses infix expressions, converts them to postfix (Reverse
+Polish Notation) and prefix (Polish Notation), and evaluates postfix expressions
+with optional variable substitution.
 
-## Objetivo
-Servir como herramienta educativa para cursos de Lenguajes y Autómatas, mostrando el uso de pilas en el proceso de conversión de expresiones.
+## :construction: Project Status
 
-## Características
-- Parser básico con soporte de: + - * / ^ y paréntesis.
-- Manejo de espacios opcionales.
-- Validación sintáctica mínima (paréntesis balanceados, tokens válidos).
-- Conversión:
-  - Infix -> Postfix (Shunting Yard)
-  - Infix -> Prefix (inversión + árbol de expresión)
-- Evaluación de expresiones postfijas con sustitución de variables.
-- CLI interactiva con:
-  - Entrada de expresión
-  - Resultados claros
+This repository started as a college assignment (Python-only) and is currently
+undergoing a Rust FFI migration (maturin + PyO3) and some parts are still in
+progress.
 
-## Requisitos
+----------
+
+## Features
+
+- Expression parsing with support for `+`, `-`, `*`, `/`, `^`, assignment and
+  parentheses
+- Basic syntax validation (balanced parentheses, valid tokens)
+- Evaluation from postfix notation with variable substitution
+
+## Requirements
+
 - Python 3.13+
 - [uv](https://docs.astral.sh/uv/)
 
-## Instalación
-Con uv:
+## Installation
+
 ```bash
-git clone git@github.com:ArekkusuDev/polish-notation.git
+git clone git@github.com:AleHanndro/polish-notation.git
 cd polish-notation
 uv sync
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 ```
 
-En la CLI
-- Escribe: (A + B) * C ^ D - E
-- Resultado Postfijo: A B + C D ^ * E -
-- Resultado Prefijo: - * + A B ^ C D E
+## Example
 
-## Estructura Propuesta
-```
-app/
-  __init__.py      # Punto de entrada
-  core/
-    lexer.py       # Tokenización
-    parser.py      # Validación / árbol
-    convert.py     # Funciones infix->postfix / infix->prefix
-    models.py      # Clases de nodo (AST)
-tests/
-  test_convert.py
-  test_lexer.py
+Input:
+
+```text
+(A + B) * C ^ D - E
 ```
 
-## Roadmap
-- [x] Configurar entorno
-- [x] Implementar lexer básico
-- [x] Implementar verificación de paréntesis
-- [x] Implementar conversión a postfija (Shunting Yard)
-- [x] Implementar conversión a prefija (AST o método invertido)
-- [x] Añadir manejo de errores con mensajes claros
-- [x] Implementar evaluación de expresiones postfijas con sustitución de variables
-- [x] Implementar CLI interactiva con questionary
-- [ ] Añadir modo "paso a paso" (cola de operadores / pila)
-- [x] Pruebas unitarias de casos simples
-- [x] Soporte de números multi-dígito
+Output:
+
+- Postfix: A B + C D ^ * E -
+- Prefix: - * + A B ^ C D E
